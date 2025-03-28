@@ -1,0 +1,3 @@
+[submodule "EVE_DAO"]
+	path = EVE_DAO
+	url = git@github.com:WilliamWeist/EVE_DAO.git
