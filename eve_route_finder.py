@@ -4,7 +4,7 @@ import config
 import EVE_DAO.models as eve
 import William_ESI_Gateway.ESI_gateway as esi
 
-STAGING_NAME = 'Turnur - Ripley\'s Kennel and Playhouse'
+STAGING_NAME = config.staging
 client_id = config.client_id
 client_secret = config.client_secret
 callback_url = config.callback_url
