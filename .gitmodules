@@ -1,3 +1,6 @@
 [submodule "EVE_DAO"]
 	path = EVE_DAO
 	url = git@github.com:WilliamWeist/EVE_DAO.git
+[submodule "William_ESI_Gateway"]
+	path = William_ESI_Gateway
+	url = https://github.com/WilliamWeist/William_ESI_Gateway.git

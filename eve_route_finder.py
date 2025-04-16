@@ -1,8 +1,14 @@
-import time, math
+import time, math, sys
 from heapq import heapify, heappop, heappush
+import config
 import EVE_DAO.models as eve
+import William_ESI_Gateway.ESI_gateway as esi
 
 STAGING_NAME = 'Turnur - Ripley\'s Kennel and Playhouse'
+client_id = config.client_id
+client_secret = config.client_secret
+callback_url = config.callback_url
+scopes = config.scopes
 
 class Dijkstra_entry:
     def __init__(self):
@@ -107,7 +113,7 @@ def optimize_routes(destinations: list[(eve.System, str)], distance_map: dict[in
 
     return routes
 
-def main(verbose:bool = False):
+def build_routes(verbose:bool = False):
     systems: list[eve.System] = eve.get_systems(eve.Galaxy.NEW_EDEN, verbose=verbose)
     staging: eve.System = find_system(STAGING_NAME.split(' - ')[0], systems)
     destinations: list[(eve.System, str)] = [(staging, STAGING_NAME)]
@@ -176,5 +182,103 @@ def main(verbose:bool = False):
                 f.write(drill_name + '\n')
             f.write(f'----- {len(route)} -----\n')
 
+def load_routes() -> list[list[str]]:
+    routes = []
+    routes.append([])
+    index = 0
+    with open('routes') as f:
+        for line in f:
+            if line.startswith('-----'):
+                routes.append([])
+                index += 1
+            else:
+                routes[index].append(line[:-1])
+    return routes[:-1]
+
+def set_waypoints(routes: list[list[str]]):
+    print('Authing to EVE Online ESI')
+    user_esi = esi.auth(client_id, client_secret, callback_url, scopes)
+    index = -1
+    while not (index >= 1 and index <= len(routes)):
+        print(f'There is {len(routes)} set of routes')
+        try:
+            choice = input(f'Start with the route ({1} - {len(routes)}):')
+            index = int(choice)
+        except ValueError:
+            choice = choice.upper()
+            match choice:
+                case 'Q':
+                    return
+                case _:
+                    index = -1
+    index = index - 1
+    while index < len(routes):
+        for drill in routes[index]:
+            print(drill)
+            drill_id = user_esi.search(drill, esi.Entity_type.STRUCTURE)[0]
+            user_esi.set_waypoint(drill_id)
+        index += 1
+        if index == len(routes): break
+        input(f'Press enter to start the route #{index+1}')
+
+def manage_users():
+    menu = 'Choose one of the following options:\n'
+    menu = menu + '\t(A): Add a new user\n'
+    menu = menu + '\t(D): Delete a user\n'
+    menu = menu + '\t(L): List all the users\n'
+    menu = menu + '\t(Q): Quit'
+    choice = None
+    while True:
+        print(menu)
+        choice = input('=>')
+        choice = choice.upper()
+        match choice:
+            case 'A':
+                pass
+            case 'D':
+                pass
+            case 'L':
+                users = load_users()
+                if len(users) == 0:
+                    print('No users saved')
+                    continue
+                _user = ''
+                for user in users:
+                    _user = _user + user.char_name + ','
+                _user = _user[:-1]
+                print(_user)
+            case 'Q':
+                return
+            case _:
+                pass
+
+def load_users() -> list[esi.Gateway]:
+    users = []
+    return users
+
+def main_menu():
+    menu = 'Choose one of the following options:\n'
+    menu = menu + '\t(C): Calculate new set of routes\n'
+    menu = menu + '\t(U): Use the current set of routes\n'
+    menu = menu + '\t(M): Manage the list of authed users\n'
+    menu = menu + '\t(Q): Quit'
+    choice = None
+    while True:
+        print(menu)
+        choice = input('=>')
+        choice = choice.upper()
+        match choice:
+            case 'C':
+                build_routes(verbose=True)
+            case 'U':
+                routes = load_routes()
+                users = load_users()
+                set_waypoints(routes)
+            case 'M':
+                manage_users()
+            case 'Q':
+                sys.exit(0)
+            case _:
+                pass
 if __name__ == '__main__':
-    main(verbose=True)
+    main_menu()
