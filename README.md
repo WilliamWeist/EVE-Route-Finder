@@ -14,12 +14,17 @@ Tool to optimize routes calculation between a staging point and a list of upwell
 
 * Clone de repository
 * * `git clone https://github.com/WilliamWeist/EVE-Route-Finder.git`
-* Install the submodule
+* Install the submodules
 * * `git submodule init`
 * * `git submodule update`
 * Install the database
 * * See [EVE-SDE-DB-Builder](https://github.com/WilliamWeist/EVE-SDE-DB-Builder) to generate the db file
 * * Copy / Symlink the `EVE.db` file at the root of the project
+* Install python dependencies
+* * [Optional] Use a virtual environment
+* * * Installation `python -m venv .venv`
+* * * Activation `source .venv/bin/activate`
+* * Run the installation script `./install.sh`
 
 ### Executing program
 
